@@ -49,45 +49,6 @@ const saveFileIncidents = () => {
 }
 loadFileIncidents()
 
-// Seed sample incidents if empty for demo
-if (inMemoryIncidents.length === 0) {
-  inMemoryIncidents = [
-    {
-      id: 'demo-1',
-      userId: 'user_demo1',
-      userName: 'Rahul Sharma',
-      emergencyType: 'Flood',
-      lat: 19.0760,
-      lng: 72.8777,
-      description: 'Water level rising quickly in residential building basement. 4 families trapped.',
-      imageUrl: '',
-      status: 'pending',
-      aiPriority: 'Critical',
-      aiReason: 'Multiple families trapped in fast rising flood waters.',
-      aiRecommendedTeam: 'Flood Rescue Unit',
-      assignedUnit: '',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'demo-2',
-      userId: 'user_demo2',
-      userName: 'Priya Patel',
-      emergencyType: 'Fire',
-      lat: 28.6139,
-      lng: 77.2090,
-      description: 'Electrical fire started on 3rd floor commercial shop.',
-      imageUrl: '',
-      status: 'assigned',
-      aiPriority: 'High',
-      aiReason: 'Active fire in commercial zone with risk of spreading.',
-      aiRecommendedTeam: 'Fire Brigade Unit 3',
-      assignedUnit: 'Fire Brigade Unit 3',
-      createdAt: new Date(Date.now() - 3600000).toISOString()
-    }
-  ]
-  saveFileIncidents()
-}
-
 // ── MongoDB Setup ───────────────────────────────────────────
 let isMongoConnected = false
 
