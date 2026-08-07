@@ -130,6 +130,15 @@ export const SOSForm = ({ onSuccess, autoDetectLocation = true }) => {
       })
     }
 
+    let savedImageUrl = ''
+    if (imageFile) {
+      savedImageUrl = await new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => resolve(e.target.result)
+        reader.readAsDataURL(imageFile)
+      })
+    }
+
     setSubmitting(true)
     try {
       // 1. Run Real AI triage FIRST
@@ -148,7 +157,7 @@ export const SOSForm = ({ onSuccess, autoDetectLocation = true }) => {
         lat:               geo.coords.lat,
         lng:               geo.coords.lng,
         description:       finalDesc,
-        imageUrl:          '',
+        imageUrl:          savedImageUrl,
         audioUrl:          savedAudioUrl,
         status:            'pending',
         aiPriority:        verdict.priority,
