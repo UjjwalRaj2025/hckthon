@@ -43,22 +43,25 @@ class ClerkErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
+      const isClerkErr = this.state.error?.message?.includes('Clerk') || this.state.error?.message?.includes('publishableKey')
       return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
           <div className="max-w-lg w-full p-8 bg-white rounded-2xl border border-red-200 shadow-2xl text-center space-y-4">
             <div className="h-14 w-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto text-2xl font-bold">
-              🔑
+              ⚠️
             </div>
-            <h2 className="text-xl font-extrabold text-slate-900">Invalid Clerk API Key</h2>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Clerk responded with an authentication error (401 Unauthorized). The <code>VITE_CLERK_PUBLISHABLE_KEY</code> in your <code>.env</code> file is invalid or incomplete.
+            <h2 className="text-xl font-extrabold text-slate-900">
+              {isClerkErr ? 'Invalid Clerk API Key' : 'Application Render Error'}
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed font-mono text-xs bg-slate-100 p-3 rounded-xl">
+              {this.state.error?.message || 'An error occurred while loading this page.'}
             </p>
-            <div className="bg-slate-100 p-3 rounded-xl text-xs font-mono text-slate-700 text-left overflow-x-auto">
-              Current Key: {CLERK_KEY ? CLERK_KEY.slice(0, 20) + '...' : 'None'}
-            </div>
-            <p className="text-xs text-slate-500">
-              Go to <a href="https://dashboard.clerk.com" target="_blank" rel="noreferrer" className="text-orange-600 font-semibold underline">dashboard.clerk.com</a> &rarr; API Keys &rarr; Copy Publishable Key to <code>.env</code> and restart the server.
-            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 rounded-xl bg-orange-600 text-white font-bold text-xs shadow-md shadow-orange-600/20 cursor-pointer"
+            >
+              Reload Page
+            </button>
           </div>
         </div>
       )

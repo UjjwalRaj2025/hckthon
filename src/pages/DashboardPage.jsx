@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { List, Map as MapIcon, Shield, Lock, Key, AlertCircle, ArrowRight, LogOut, Radio, Send, Users, ShieldCheck, X } from 'lucide-react'
+import { List, Map as MapIcon, Shield, Lock, Key, AlertCircle, ArrowRight, LogOut, Radio, Send, Users, ShieldCheck, X, MapPin, Volume2 } from 'lucide-react'
 import { StatsBar } from '../components/dashboard/StatsBar'
 import { LeafletMap } from '../components/map/LeafletMap'
 import { IncidentDetailPanel } from '../components/dashboard/IncidentDetailPanel'
