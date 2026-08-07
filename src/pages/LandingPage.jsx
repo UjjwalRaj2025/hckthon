@@ -120,7 +120,7 @@ export default function LandingPage() {
       {/* ── STATS BOXES ── */}
       <section className="py-12 border-y border-slate-200 bg-slate-50/60">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
             {STATS.map(({ value, suffix, label, icon: Icon, color, bg }, i) => (
               <motion.div
                 key={i}
