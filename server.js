@@ -327,10 +327,11 @@ app.get('/api/health', (req, res) => res.json({
 }))
 
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 ResQAI server listening permanently on port ${PORT}`)
-})
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 ResQAI server listening permanently on port ${PORT}`)
+  })
+}
 
-// Keep-alive heartbeat timer to prevent Node event loop exit
-setInterval(() => {}, 60000)
+export default app
 
