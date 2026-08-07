@@ -61,7 +61,6 @@ export const Navbar = () => {
 
               {/* Real Clerk UserButton */}
               <UserButton
-                afterSignOutUrl="/"
                 appearance={{
                   elements: {
                     avatarBox: 'h-9 w-9 rounded-xl border border-slate-200 shadow-sm',

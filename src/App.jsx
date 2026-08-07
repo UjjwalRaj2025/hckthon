@@ -10,7 +10,8 @@ import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './context/ToastContext'
 
 
-const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const rawKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || ''
+const CLERK_KEY = rawKey.trim()
 
 // Lazy-loaded pages — SOS is Home!
 const SOSPage            = lazy(() => import('./pages/SOSPage'))
@@ -84,7 +85,7 @@ export default function App() {
 
   return (
     <ClerkErrorBoundary>
-      <ClerkProvider publishableKey={CLERK_KEY} afterSignInUrl="/" afterSignUpUrl="/">
+      <ClerkProvider publishableKey={CLERK_KEY} fallbackRedirectUrl="/">
         <BrowserRouter>
           <ThemeProvider>
             <AuthProvider>
