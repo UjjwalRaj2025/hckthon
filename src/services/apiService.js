@@ -33,11 +33,25 @@ export const patchIncident = (id, patch) => req('PATCH', `/incidents/${id}`, pat
 /** Delete an incident permanently */
 export const deleteIncident = (id) => req('DELETE', `/incidents/${id}`)
 
-/** Upload an image file for an incident */
+/** Upload an image file for an incident (with automatic Base64 fallback) */
 export const uploadIncidentImage = async (id, file) => {
-  const form = new FormData()
-  form.append('image', file)
-  return req('POST', `/incidents/${id}/image`, form, true)
+  try {
+    const form = new FormData()
+    form.append('image', file)
+    return await req('POST', `/incidents/${id}/image`, form, true)
+  } catch (err) {
+    try {
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => resolve(e.target.result)
+        reader.readAsDataURL(file)
+      })
+      return await req('PATCH', `/incidents/${id}`, { imageUrl: base64 })
+    } catch (fallbackErr) {
+      console.warn('Image upload fallback skipped:', fallbackErr)
+      return { success: false }
+    }
+  }
 }
 
 // ── 50km Emergency Radius Broadcast ──────────────────────────

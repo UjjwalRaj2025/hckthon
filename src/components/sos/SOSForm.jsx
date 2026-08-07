@@ -146,10 +146,14 @@ export const SOSForm = ({ onSuccess, autoDetectLocation = true }) => {
         aiRecommendedTeam: verdict.recommendedTeam,
       })
 
-      // 3. Upload disaster photo if attached
+      // 3. Upload disaster photo if attached (safely caught)
       if (imageFile) {
         setAIStep('uploading')
-        await uploadIncidentImage(incident.id, imageFile)
+        try {
+          await uploadIncidentImage(incident.id, imageFile)
+        } catch (uploadErr) {
+          console.warn('Photo upload fallback handled gracefully:', uploadErr)
+        }
       }
 
       setAIStep('done')
@@ -303,24 +307,51 @@ export const SOSForm = ({ onSuccess, autoDetectLocation = true }) => {
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <div className="space-y-1.5">
+        {/* ── Disaster Photo Upload & Take Camera Photo ── */}
+        <div className="space-y-2">
           <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Disaster Photo (Optional)</label>
-          <label className="relative block cursor-pointer group">
-            <input type="file" accept="image/*" onChange={handleImage} className="sr-only" />
-            {imagePreview ? (
-              <div className="relative rounded-xl overflow-hidden h-36 border border-slate-200 shadow-xs">
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <p className="text-white text-xs font-bold">Click to replace photo</p>
+
+          {imagePreview ? (
+            <div className="relative rounded-2xl overflow-hidden h-40 border border-slate-200 shadow-xs group">
+              <img src={imagePreview} alt="Disaster Preview" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => { setImageFile(null); setImagePreview(null) }}
+                className="absolute top-2 right-2 px-3 py-1 rounded-xl bg-slate-900/80 text-white text-xs font-bold flex items-center gap-1 hover:bg-red-600 transition-colors cursor-pointer"
+              >
+                Remove Photo
+              </button>
+              <div className="absolute bottom-2 left-2 px-3 py-1 rounded-xl bg-slate-900/75 text-white text-xs font-bold backdrop-blur-xs flex items-center gap-1.5">
+                📸 Photo Attached
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Option 1: Gallery Upload */}
+              <label className="h-20 rounded-2xl border-2 border-dashed border-slate-300 hover:border-orange-500 hover:bg-orange-50/50 transition-all flex items-center justify-center gap-3 bg-white shadow-xs cursor-pointer px-3">
+                <input type="file" accept="image/*" onChange={handleImage} className="sr-only" />
+                <div className="h-9 w-9 rounded-xl bg-orange-100 border border-orange-200 text-orange-600 flex items-center justify-center flex-shrink-0">
+                  <Camera size={18} />
                 </div>
-              </div>
-            ) : (
-              <div className="h-24 rounded-xl border-2 border-dashed border-slate-300 group-hover:border-orange-500 transition-colors flex flex-col items-center justify-center gap-1.5 bg-white shadow-xs">
-                <Camera size={20} className="text-slate-400 group-hover:text-orange-500 transition-colors" />
-                <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">Click to upload photo</span>
-              </div>
-            )}
-          </label>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-800">Gallery Photo</p>
+                  <p className="text-[10px] text-slate-500 font-medium">Choose file</p>
+                </div>
+              </label>
+
+              {/* Option 2: Live Camera Capture */}
+              <label className="h-20 rounded-2xl border-2 border-dashed border-blue-300 hover:border-blue-500 hover:bg-blue-50/50 transition-all flex items-center justify-center gap-3 bg-white shadow-xs cursor-pointer px-3">
+                <input type="file" accept="image/*" capture="environment" onChange={handleImage} className="sr-only" />
+                <div className="h-9 w-9 rounded-xl bg-blue-100 border border-blue-200 text-blue-600 flex items-center justify-center flex-shrink-0">
+                  <Camera size={18} className="text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-800">Take Live Photo</p>
+                  <p className="text-[10px] text-slate-500 font-medium">Open camera</p>
+                </div>
+              </label>
+            </div>
+          )}
         </div>
 
         <AnimatePresence>
