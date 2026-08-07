@@ -212,18 +212,24 @@ app.post('/api/incidents/:id/image', upload.single('image'), async (req, res) =>
   }
 })
 
-// DELETE incident
+// DELETE incident (Mark Case Resolved)
 app.delete('/api/incidents/:id', async (req, res) => {
   try {
-    if (isMongoConnected) {
-      await Incident.findByIdAndDelete(req.params.id)
-    } else {
-      inMemoryIncidents = inMemoryIncidents.filter((i) => i.id !== req.params.id)
-      saveFileIncidents()
+    await connectToDatabase()
+    if (mongoose.connection.readyState === 1) {
+      if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+        await Incident.findByIdAndDelete(req.params.id)
+      }
+      await Incident.deleteMany({ id: req.params.id })
     }
-    res.json({ success: true })
+    inMemoryIncidents = inMemoryIncidents.filter((i) => i.id !== req.params.id)
+    saveFileIncidents()
+    return res.json({ success: true, message: 'Incident resolved & removed' })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('Delete incident error:', err)
+    inMemoryIncidents = inMemoryIncidents.filter((i) => i.id !== req.params.id)
+    saveFileIncidents()
+    return res.json({ success: true, message: 'Incident removed' })
   }
 })
 
