@@ -15,7 +15,7 @@ export default function SOSPage() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 pt-20 bg-slate-50">
-        <div className="text-center space-y-4 max-w-sm w-full bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+        <div className="text-center space-y-4 max-w-sm w-full bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl">
           <div className="h-16 w-16 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center mx-auto text-orange-600">
             <AlertTriangle className="h-8 w-8" />
           </div>
@@ -32,7 +32,7 @@ export default function SOSPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 pt-24 pb-16 bg-slate-50 relative overflow-hidden">
+    <div className="min-h-screen px-3 sm:px-4 pt-20 sm:pt-24 pb-16 bg-slate-50 relative overflow-hidden">
       {/* Background radial glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 

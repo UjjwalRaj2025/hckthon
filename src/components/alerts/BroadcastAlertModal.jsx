@@ -279,7 +279,7 @@ export const BroadcastAlertModal = () => {
             boxShadow: { duration: 0.5, repeat: 3, ease: 'easeInOut' },
             default: { type: 'spring', stiffness: 450, damping: 28 }
           }}
-          className="relative max-w-lg w-full bg-slate-900 border-2 border-red-500 rounded-3xl p-6 sm:p-8 shadow-2xl text-white overflow-hidden space-y-6"
+          className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto bg-slate-900 border-2 border-red-500 rounded-3xl p-5 sm:p-8 shadow-2xl text-white space-y-5 scrollbar-hide"
         >
           {/* Pulsing Radar Alert Header */}
           <div className="flex items-center gap-4 border-b border-red-500/20 pb-5">
