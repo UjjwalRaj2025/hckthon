@@ -49,31 +49,31 @@ const saveFileIncidents = () => {
 }
 loadFileIncidents()
 
-// ── MongoDB Setup ───────────────────────────────────────────
-let isMongoConnected = false
+// ── Serverless-ready MongoDB Connection Caching ──────────────
+let cachedDb = null
 
-const mongoUri = process.env.MONGODB_URI || ''
-const isPlaceholder = !mongoUri || mongoUri.includes('USERNAME:PASSWORD') || mongoUri.includes('<password>')
-
-if (!isPlaceholder) {
-  try {
-    mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 10000,
-      family: 4, // Force IPv4 to prevent ECONNRESET on Windows DNS
-    })
-      .then(() => {
-        isMongoConnected = true
-        console.log('✅ MongoDB Atlas Connected!')
-      })
-      .catch((e) => {
-        isMongoConnected = false
-        console.log('ℹ️ Running in resilient local JSON storage mode (MongoDB Atlas connection failed: ' + e.message + ')')
-      })
-  } catch (e) {
-    isMongoConnected = false
+async function connectToDatabase() {
+  if (cachedDb && mongoose.connection.readyState === 1) {
+    return cachedDb
   }
-} else {
-  console.log('ℹ️ Running in resilient local JSON storage mode.')
+
+  const mongoUri = process.env.MONGODB_URI || ''
+  const isPlaceholder = !mongoUri || mongoUri.includes('USERNAME:PASSWORD') || mongoUri.includes('<password>')
+
+  if (!isPlaceholder) {
+    try {
+      const db = await mongoose.connect(mongoUri, {
+        serverSelectionTimeoutMS: 10000,
+        family: 4,
+      })
+      cachedDb = db
+      console.log('✅ MongoDB Atlas Connected!')
+      return db
+    } catch (e) {
+      console.error('MongoDB Atlas connection error:', e.message)
+    }
+  }
+  return null
 }
 
 // ── Incident Schema & Model ──────────────────────────────────
@@ -112,12 +112,12 @@ const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } })
 // GET all incidents (sorted newest first)
 app.get('/api/incidents', async (req, res) => {
   try {
-    if (isMongoConnected) {
+    await connectToDatabase()
+    if (mongoose.connection.readyState === 1) {
       const incidents = await Incident.find().sort({ createdAt: -1 }).lean()
       const mapped = incidents.map(({ _id, ...rest }) => ({ id: _id.toString(), ...rest }))
       return res.json(mapped)
     }
-    // Fallback
     const sorted = [...inMemoryIncidents].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
     res.json(sorted)
   } catch (err) {
@@ -129,7 +129,8 @@ app.get('/api/incidents', async (req, res) => {
 // GET single incident
 app.get('/api/incidents/:id', async (req, res) => {
   try {
-    if (isMongoConnected) {
+    await connectToDatabase()
+    if (mongoose.connection.readyState === 1) {
       const doc = await Incident.findById(req.params.id).lean()
       if (!doc) return res.status(404).json({ error: 'Not found' })
       const { _id, ...rest } = doc
@@ -146,7 +147,8 @@ app.get('/api/incidents/:id', async (req, res) => {
 // POST create incident
 app.post('/api/incidents', async (req, res) => {
   try {
-    if (isMongoConnected) {
+    await connectToDatabase()
+    if (mongoose.connection.readyState === 1) {
       const doc = await Incident.create(req.body)
       return res.status(201).json({ id: doc._id.toString(), ...doc.toObject({ versionKey: false }) })
     }
@@ -167,7 +169,8 @@ app.post('/api/incidents', async (req, res) => {
 // PATCH update incident
 app.patch('/api/incidents/:id', async (req, res) => {
   try {
-    if (isMongoConnected) {
+    await connectToDatabase()
+    if (mongoose.connection.readyState === 1) {
       const doc = await Incident.findByIdAndUpdate(
         req.params.id,
         { $set: req.body },
@@ -178,11 +181,11 @@ app.patch('/api/incidents/:id', async (req, res) => {
       return res.json({ id: _id.toString(), ...rest })
     }
     // Fallback
-    const index = inMemoryIncidents.findIndex((i) => i.id === req.params.id)
-    if (index === -1) return res.status(404).json({ error: 'Not found' })
-    inMemoryIncidents[index] = { ...inMemoryIncidents[index], ...req.body, updatedAt: new Date().toISOString() }
+    const idx = inMemoryIncidents.findIndex((i) => i.id === req.params.id)
+    if (idx === -1) return res.status(404).json({ error: 'Not found' })
+    inMemoryIncidents[idx] = { ...inMemoryIncidents[idx], ...req.body, updatedAt: new Date().toISOString() }
     saveFileIncidents()
-    res.json(inMemoryIncidents[index])
+    res.json(inMemoryIncidents[idx])
   } catch (err) {
     res.status(400).json({ error: err.message })
   }
