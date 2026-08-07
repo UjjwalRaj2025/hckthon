@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base reset ── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans min-h-screen;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Custom clean scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400;
+  }
+
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Focus visible */
+  :focus-visible {
+    outline: 2px solid #F97316;
+    outline-offset: 2px;
+  }
+}
+
+/* ── Custom Utilities ── */
+@layer utilities {
+  /* Crisp White Glass Card */
+  .card-white {
+    @apply bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl;
+  }
+
+  /* Glassmorphism Header */
+  .glass-nav {
+    @apply bg-white/85 backdrop-blur-md border-b border-slate-200/80 shadow-xs;
+  }
+
+  /* Gradient Text */
+  .gradient-orange-blue {
+    @apply bg-gradient-to-r from-orange-600 via-amber-500 to-blue-600 bg-clip-text text-transparent;
+  }
+}
+
+/* ── Leaflet clean map overrides ── */
+.leaflet-container {
+  background: #F8FAFC !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
+}
+
+/* Crisp White popup card */
+.leaflet-popup-content-wrapper {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+  padding: 0 !important;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+.leaflet-popup-tip {
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+.leaflet-popup-close-button {
+  color: #94A3B8 !important;
+  font-size: 18px !important;
+  top: 8px !important;
+  right: 10px !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #0F172A !important;
+}
+
+/* Custom popup inner content */
+.resq-popup-inner {
+  padding: 14px 16px;
+  min-width: 210px;
+}
+.resq-popup-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 6px;
+}
+.resq-popup-badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.resq-popup-badge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.resq-popup-status {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #475569;
+  font-weight: 500;
+}
+.resq-popup-desc {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+.resq-popup-meta {
+  font-size: 11px;
+  color: #64748B;
+}
+
+/* Leaflet zoom controls */
+.leaflet-control-zoom {
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+}
+.leaflet-control-zoom a {
+  background: #FFFFFF !important;
+  color: #334155 !important;
+  border-bottom: 1px solid #F1F5F9 !important;
+}
+.leaflet-control-zoom a:hover {
+  background: #F8FAFC !important;
+  color: #0284C7 !important;
+}
