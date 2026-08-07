@@ -495,9 +495,41 @@ const IncidentListCard = ({ incident, selected, onClick, onResolve }) => {
           <Badge value={incident.status} showDot={false} />
         </div>
       </div>
+      {/* GPS Location & Media Badges */}
+      <div className="flex items-center gap-2 flex-wrap text-[11px] font-mono font-bold text-slate-500">
+        <span className="flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+          <MapPin size={11} className="text-orange-500" />
+          {incident.lat?.toFixed(4)}, {incident.lng?.toFixed(4)}
+        </span>
+        {incident.audioUrl && (
+          <span className="flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-md border border-orange-200 font-sans font-bold">
+            <Volume2 size={11} className="animate-pulse" /> Voice Note
+          </span>
+        )}
+        {incident.imageUrl && (
+          <span className="flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200 font-sans font-bold">
+            📸 Photo
+          </span>
+        )}
+      </div>
+
       <p className="text-xs text-slate-600 leading-relaxed font-medium">
         {truncate(incident.description, 85)}
       </p>
+
+      {/* Voice Note Audio Player if present */}
+      {incident.audioUrl && (
+        <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+          <audio controls src={incident.audioUrl} className="w-full h-8 rounded-lg" />
+        </div>
+      )}
+
+      {/* Photo Thumbnail if present */}
+      {incident.imageUrl && (
+        <div className="rounded-xl overflow-hidden h-28 border border-slate-200 bg-slate-900">
+          <img src={incident.imageUrl} alt="Disaster" className="w-full h-full object-cover" />
+        </div>
+      )}
 
       <div className="flex items-center justify-between pt-2 border-t border-slate-100 flex-wrap gap-2">
         <p className="text-[11px] text-slate-500 font-semibold">👤 {incident.userName || 'Anonymous Citizen'}</p>

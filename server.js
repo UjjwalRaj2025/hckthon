@@ -88,6 +88,7 @@ const incidentSchema = new mongoose.Schema({
   lng:               { type: Number, required: true },
   description:       { type: String, required: true },
   imageUrl:          { type: String, default: '' },
+  audioUrl:          { type: String, default: '' },
   status:            { type: String, default: 'pending', enum: ['pending', 'assigned', 'in_progress', 'resolved'] },
   aiPriority:        { type: String, default: 'Medium', enum: ['Critical', 'High', 'Medium', 'Low'] },
   aiReason:          { type: String, default: '' },

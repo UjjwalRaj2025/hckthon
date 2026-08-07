@@ -121,6 +121,15 @@ export const SOSForm = ({ onSuccess, autoDetectLocation = true }) => {
     const baseDesc = description.trim() || `Emergency incident reported for ${type}.`
     const finalDesc = audioUrl ? `${baseDesc} [Voice Distress Note Attached: ${recordingTime}s]` : baseDesc
 
+    let savedAudioUrl = ''
+    if (audioBlob) {
+      savedAudioUrl = await new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => resolve(e.target.result)
+        reader.readAsDataURL(audioBlob)
+      })
+    }
+
     setSubmitting(true)
     try {
       // 1. Run Real AI triage FIRST
@@ -140,6 +149,7 @@ export const SOSForm = ({ onSuccess, autoDetectLocation = true }) => {
         lng:               geo.coords.lng,
         description:       finalDesc,
         imageUrl:          '',
+        audioUrl:          savedAudioUrl,
         status:            'pending',
         aiPriority:        verdict.priority,
         aiReason:          verdict.reason,
