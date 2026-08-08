@@ -1,1 +1,1 @@
-export { analyzeEmergencyPriority, analyzeDamageImage } from './aiService'
+export { analyzeEmergencyPriority, analyzeDamageImage, assessDisasterSeverityEnum } from './aiService'

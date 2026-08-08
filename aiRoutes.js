@@ -1,5 +1,5 @@
 import express from "express";
-import { analyzeSOS, assessDamage } from "./src/services/aiService.js";
+import { analyzeSOS, assessDamage, assessDisasterSeverityEnum } from "./src/services/aiService.js";
 
 const router = express.Router();
 
@@ -30,7 +30,18 @@ router.post("/api/sos", async (req, res) => {
   }
 });
 
-// 📷 2. Handle Drag-and-Drop Damage Assessment
+// ⚡ 2. Strict Enum Severity Assessment (Gemini 2.5 Flash)
+router.post("/api/assess-severity-enum", async (req, res) => {
+  const { imageBase64, userDescription, mimeType } = req.body;
+  try {
+    const severity = await assessDisasterSeverityEnum(imageBase64, userDescription, mimeType || "image/jpeg");
+    res.status(200).json({ success: true, severity });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// 📷 3. Handle Drag-and-Drop Damage Assessment
 router.post("/api/damage-assessment", async (req, res) => {
   const { imageBase64, mimeType } = req.body;
 

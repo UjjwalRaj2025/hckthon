@@ -86,6 +86,61 @@ const inspectImageFallback = (imageBase64 = "") => {
 };
 
 /**
+ * ⚡ Strict Enum Severity Assessment using Gemini 2.5 Flash
+ * Programmatically locked to return exactly one of ['🔴 Critical', '🟠 High', '🟡 Medium', '🟢 Low']
+ */
+export async function assessDisasterSeverityEnum(imageBase64 = null, userDescription = "", mimeType = "image/jpeg") {
+  try {
+    const ai = getAIClient();
+    if (!ai) {
+      const fb = fallbackSOS(userDescription, "Emergency");
+      return fb.severity === "Critical" ? "🔴 Critical" : fb.severity === "High" ? "🟠 High" : "🟡 Medium";
+    }
+
+    const contents = [];
+    if (imageBase64) {
+      contents.push({
+        inlineData: {
+          mimeType: mimeType,
+          data: imageBase64,
+        },
+      });
+    }
+
+    contents.push(`
+    Analyze the attached image and description to evaluate the disaster/emergency situation severity.
+    
+    Context provided by user: ${userDescription}
+    
+    Criteria:
+    - 🔴 Critical: Life-threatening, active structural collapse, severe flooding/fire, human entrapment.
+    - 🟠 High: Significant structural damage, major blockages, high potential risk to life or safety.
+    - 🟡 Medium: Moderate damage, non-life-threatening disruption, localized property damage.
+    - 🟢 Low: Minor issue, cosmetic damage, routine hazard with no immediate threat.
+    `);
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: contents,
+      config: {
+        responseMimeType: 'text/x.enum',
+        responseSchema: {
+          type: 'STRING',
+          enum: ['🔴 Critical', '🟠 High', '🟡 Medium', '🟢 Low'],
+        },
+        temperature: 0.1, // Low temperature for deterministic output
+      },
+    });
+
+    return response.text ? response.text.trim() : "🟡 Medium";
+  } catch (error) {
+    console.warn("Gemini 2.5 Flash Enum Notice (using fallback):", error.message);
+    const fb = fallbackSOS(userDescription, "Emergency");
+    return fb.severity === "Critical" ? "🔴 Critical" : fb.severity === "High" ? "🟠 High" : "🟡 Medium";
+  }
+}
+
+/**
  * 🚨 PILLAR 3: ResQAI Emergency Triage Engine
  * System Prompt: Clinical, objective, urgent emergency dispatch command system.
  */
@@ -94,7 +149,7 @@ export async function analyzeSOS(text, disasterType = "Emergency", audioBase64 =
     const ai = getAIClient();
     if (!ai) return fallbackSOS(text, disasterType);
 
-    const systemInstruction = `You are the ResQAI Emergency Triage Engine, an advanced, real-time automated dispatch command system. Your sole purpose is to process incoming civilian SOS distress signals and convert them into highly structured, actionable intelligence for rescue authorities.
+    const systemInstruction = `You are the ResQAI Emergency Triage Engine, an advanced, real-time automated dispatch command system using Gemini 2.5 Flash. Your sole purpose is to process incoming civilian SOS distress signals and convert them into highly structured, actionable intelligence for rescue authorities.
 
 Your tone must be clinical, objective, and urgent. Do not include empathy, filler words, or conversational text.
 
@@ -125,7 +180,7 @@ Output ONLY a valid JSON object matching the requested schema.`;
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: contents,
       config: {
         responseMimeType: "application/json",
@@ -173,7 +228,7 @@ export async function assessDamage(imageBase64, mimeType = "image/jpeg") {
     const prompt = `Examine this image. First, determine is_real_disaster (boolean). If false, provide a rejection_reason (e.g., 'This appears to be a screenshot of code or a signature'). If true, provide structural_damage, hazard_risks (array), and recommended_rescue_actions (array). Return only JSON.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [
         { text: prompt },
         { inlineData: { data: imageBase64, mimeType: mimeType } }
@@ -215,9 +270,32 @@ export async function assessDamage(imageBase64, mimeType = "image/jpeg") {
 
 // ── Aliases for Frontend Compatibility ──
 export const analyzeEmergencyPriority = async (description, emergencyType, imageFile = null) => {
+  let imageBase64 = null;
+  let mimeType = "image/jpeg";
+  if (imageFile) {
+    const reader = new FileReader();
+    imageBase64 = await new Promise((resolve) => {
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.readAsDataURL(imageFile);
+    });
+    mimeType = imageFile.type || "image/jpeg";
+  }
+
+  // Also query Gemini 2.5 Flash Enum model for exact severity
+  const strictEnumSeverity = await assessDisasterSeverityEnum(imageBase64, `${emergencyType}: ${description}`, mimeType);
+
   const result = await analyzeSOS(description, emergencyType);
+  
+  // Clean severity level from enum if provided
+  let finalPriority = result.severity;
+  if (strictEnumSeverity.includes("Critical")) finalPriority = "Critical";
+  else if (strictEnumSeverity.includes("High")) finalPriority = "High";
+  else if (strictEnumSeverity.includes("Medium")) finalPriority = "Medium";
+  else if (strictEnumSeverity.includes("Low")) finalPriority = "Low";
+
   return {
-    priority: result.severity,
+    priority: finalPriority,
+    strictEnum: strictEnumSeverity,
     reason: result.ai_reasoning,
     recommendedTeam: result.dispatch_unit,
     situationSummary: result.situation_summary,
