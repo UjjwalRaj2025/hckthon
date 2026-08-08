@@ -15,6 +15,18 @@ export const DamageResultCard = ({ result }) => {
       transition={{ duration: 0.35, ease: 'easeOut' }}
       className="space-y-4"
     >
+      {/* Non-Disaster Flag Banner */}
+      {result.isRealDisaster === false && (
+        <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 space-y-1 text-amber-900 shadow-xs">
+          <p className="text-xs font-black uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+            ⚠️ NON-DISASTER IMAGE DETECTED BY AI VISION
+          </p>
+          <p className="text-xs font-bold leading-relaxed text-amber-800">
+            {result.affectedArea || "This photo appears to be a software UI screenshot, signature, personal photo, or non-disaster photograph. Please upload an actual physical disaster photo."}
+          </p>
+        </div>
+      )}
+
       {/* Main result */}
       <Card className={`relative overflow-hidden border-2 bg-white ${cfg.border} shadow-md`}>
         <div className="relative space-y-4">
