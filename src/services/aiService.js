@@ -272,6 +272,8 @@ export async function assessDamage(imageBase64, mimeType = "image/jpeg") {
 export const analyzeEmergencyPriority = async (description, emergencyType, imageFile = null) => {
   let imageBase64 = null;
   let mimeType = "image/jpeg";
+  let visionValidation = null;
+
   if (imageFile) {
     const reader = new FileReader();
     imageBase64 = await new Promise((resolve) => {
@@ -279,6 +281,20 @@ export const analyzeEmergencyPriority = async (description, emergencyType, image
       reader.readAsDataURL(imageFile);
     });
     mimeType = imageFile.type || "image/jpeg";
+
+    // 🔍 Perform AI Vision verification to check if the photo is a real physical disaster
+    visionValidation = await assessDamage(imageBase64, mimeType);
+    if (visionValidation && visionValidation.is_real_disaster === false) {
+      return {
+        priority: "Low",
+        strictEnum: "🟢 Low",
+        reason: `⚠️ ${visionValidation.rejection_reason || "Non-disaster photo detected (e.g. signature, handwriting, document, or personal photo)."} Please upload a real disaster photo (fire, flood, landslide, structural collapse).`,
+        recommendedTeam: "Routine Inspection Unit",
+        situationSummary: "Non-disaster media submission flagged by AI Vision.",
+        isRealDisaster: false,
+        rejectionReason: visionValidation.rejection_reason
+      };
+    }
   }
 
   // Also query Gemini 2.5 Flash Enum model for exact severity
@@ -299,6 +315,7 @@ export const analyzeEmergencyPriority = async (description, emergencyType, image
     reason: result.ai_reasoning,
     recommendedTeam: result.dispatch_unit,
     situationSummary: result.situation_summary,
+    isRealDisaster: true
   };
 };
 

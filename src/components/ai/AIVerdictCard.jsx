@@ -52,6 +52,18 @@ export const AIVerdictCard = ({ verdict, incident }) => {
             </div>
           </div>
 
+          {/* Non-Disaster Photo Rejection Warning */}
+          {verdict?.isRealDisaster === false && (
+            <div className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 space-y-1 text-amber-900 shadow-xs">
+              <p className="text-xs font-black uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+                ⚠️ NON-DISASTER PHOTO DETECTED BY AI VISION
+              </p>
+              <p className="text-xs font-bold leading-relaxed text-amber-800">
+                {verdict.reason}
+              </p>
+            </div>
+          )}
+
           {/* AI Reasoning Box */}
           <div className={`rounded-2xl ${cfg.bg} border ${cfg.border} p-4 space-y-1`}>
             <p className="text-[11px] uppercase tracking-wider text-slate-500 font-extrabold">AI Reasoning & Analysis</p>
